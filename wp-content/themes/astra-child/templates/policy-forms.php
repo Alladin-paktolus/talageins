@@ -61,42 +61,42 @@ get_header();
 
         <!-- STEP 1 -->
         <section class="form-section form-step form-step-1 active" role="main">
-            <?php get_template_part( 'template-parts/form-steps/basic', 'details' ); ?>
+            <?php get_template_part( 'template-parts/form-steps/step-1', 'basic-details' ); ?>
         </section>
 
         <!-- STEP 2 -->
         <section class="form-section form-step form-step-2" role="main">
-            <?php get_template_part( 'template-parts/form-steps/policy', 'details' ); ?>
+            <?php get_template_part( 'template-parts/form-steps/step-2', 'policy-details' ); ?>
         </section>
 
         <!-- STEP 3 -->
         <section class="form-section form-step form-step-3" role="main">
-            <?php get_template_part( 'template-parts/form-steps/carriers', 'details' ); ?>
+            <?php get_template_part( 'template-parts/form-steps/step-3', 'carriers-details' ); ?>
         </section>
 
         <!-- STEP 4 -->
         <section class="form-section form-step form-step-4" role="main">
-            <?php get_template_part( 'template-parts/form-steps/business', 'details' ); ?>
+            <?php get_template_part( 'template-parts/form-steps/step-4', 'business-details' ); ?>
         </section>
 
         <!-- STEP 5 -->
         <section class="form-section form-step form-step-5" role="main">
-            <?php get_template_part( 'template-parts/form-steps/claims', 'history' ); ?>
+            <?php get_template_part( 'template-parts/form-steps/step-5', 'claims-history' ); ?>
         </section>
 
         <!-- STEP 6 -->
         <section class="form-section form-step form-step-6" role="main">
-            <?php get_template_part( 'template-parts/form-steps/operations', 'details' ); ?>
+            <?php get_template_part( 'template-parts/form-steps/step-6', 'operations-details' ); ?>
         </section>
 
         <!-- STEP 7 -->
         <section class="form-section form-step form-step-7" role="main">
-            <?php get_template_part( 'template-parts/form-steps/underwriting', 'questions' ); ?>
+            <?php get_template_part( 'template-parts/form-steps/step-7', 'underwriting-questions' ); ?>
         </section>
 
         <!-- STEP 8 -->
         <section class="form-section form-step form-step-8" aria-labelledby="disclosure-heading">
-            <?php get_template_part( 'template-parts/form-steps/agreements', 'disclosures' ); ?>
+            <?php get_template_part( 'template-parts/form-steps/step-8', 'agreements-disclosures' ); ?>
         </section>
 
         <!-- FOOTER -->
