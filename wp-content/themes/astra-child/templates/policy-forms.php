@@ -58,7 +58,9 @@ get_header();
     </section>
 
     <form id="multiStepForm">
-
+        <div class="form-loader">
+            <div class="loader-spinner"></div>
+        </div>
         <!-- STEP 1 -->
         <section class="form-section form-step form-step-1 active" role="main">
             <?php get_template_part( 'template-parts/form-steps/step-1', 'basic-details' ); ?>

@@ -8,7 +8,7 @@
     <div class="form-group">
       <label> Agency <span class="asteric">*</span>
       </label>
-      <div class="custom-select">
+      <div class="custom-select agency-select">
         <div class="select-box" tabindex="0" role="button" aria-haspopup="listbox" aria-expanded="false">
           <span class="selected-text"> Confie Insurance Group </span>
           <i class="fa-solid fa-chevron-down arrow-icon" aria-hidden="true"></i>
@@ -18,6 +18,7 @@
         </div>
       </div>
     </div>
+   
     <!-- Agency Location -->
     <div class="form-group">
       <label> Agency Location <span class="asteric">*</span>
@@ -37,21 +38,22 @@
     <!-- NAICS -->
     <div class="form-group">
       <label>NAICS Code</label>
-      <input type="text" name="naics_code" placeholder="e.g. 722511" maxlength="6">
+      <input type="text" id="naics_code" name="naics_code" placeholder="e.g. 722511" maxlength="6">
     </div>
     <!-- SIC -->
     <div class="form-group">
       <label>SIC Code</label>
-      <input type="text" name="sic_code" placeholder="-">
+      <input type="text" id="sic_code" name="sic_code" placeholder="-">
     </div>
     <!-- Industry -->
     <div class="form-group">
       <label> Industry <span class="asteric">*</span>
       </label>
-      <div class="custom-select">
+      <div class="custom-select industry-select">
         <input type="hidden" name="industry" value="Retail">
         <div class="select-box">
           <span class="selected-text"> Retail </span>
+          <i class="fa-solid fa-chevron-down arrow-icon" aria-hidden="true"></i>
         </div>
         <div class="options-container">
           <div class="option active" data-value="Retail"> Retail </div>
@@ -60,9 +62,9 @@
       </div>
     </div>
     <!-- Profession -->
-    <div class="form-group disabled">
+    <div class="form-group">
       <label>Profession</label>
-      <input type="text" name="profession" placeholder="Select profession" disabled>
+      <input type="text" id="profession" name="profession" placeholder="Select profession" disabled>
     </div>
     <!-- Business Name -->
     <div class="form-group">
@@ -118,5 +120,8 @@
       <label>Application Tag</label>
       <input type="text" name="application_tag" placeholder="Optional reference">
     </div>
+
+     <input type="hidden" id="agency_id" name="agency_id" value="">
+    <input type="hidden" id="industryCodeId" name="industry_code_id" value="">
   </div>
 </div>
