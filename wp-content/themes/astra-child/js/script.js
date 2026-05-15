@@ -34,132 +34,239 @@ jQuery(document).ready(function ($) {
 
     /*
     =====================================
-    Load Saved Form Data - FIXED
+    Restore Dynamic Sections
     =====================================
     */
+   
 
-    function loadSavedFormData() {
+    async function restoreDynamicSections() {
 
-        $('.form-step').each(function (index) {
+        console.log('=== Restoring Dynamic Sections ===');
 
-            const stepNumber = index + 1;
-            const savedData = localStorage.getItem(`step_${stepNumber}_data_inserted`);
+        /*
+        =====================================
+        OWNERS
+        =====================================
+        */
 
-            if (!savedData) {
-                console.log(`No saved data for step ${stepNumber}`);
-                return;
+        const ownerData = JSON.parse(
+            localStorage.getItem('step_3_data_inserted') || '{}'
+        );
+
+        let ownerIndexes = [];
+
+        Object.keys(ownerData).forEach(function (key) {
+            const match = key.match(/owner_(\d+)_/);
+            if (match && match[1]) {
+                ownerIndexes.push(parseInt(match[1]));
             }
-
-            let stepData;
-
-            try {
-                stepData = JSON.parse(savedData);
-            } catch (e) {
-                console.error(`Error parsing step ${stepNumber} data:`, e);
-                return;
-            }
-
-            console.log(`Loading step ${stepNumber} data:`, stepData);
-
-            const $step = $(this);
-
-            Object.keys(stepData).forEach(function (key) {
-
-                const value = stepData[key];
-                const $field = $step.find(`[name="${key}"]`);
-
-                if (!$field.length) {
-                    console.warn(`Field not found: ${key}`);
-                    return;
-                }
-
-                const fieldType = $field.attr('type');
-
-                /*
-                Radio Button - FIXED
-                */
-                if (fieldType === 'radio') {
-
-                    const $radioToCheck = $step.find(`[name="${key}"][value="${value}"]`);
-
-                    if ($radioToCheck.length) {
-                        $radioToCheck.prop('checked', true).trigger('change');
-                        console.log(`Radio set: ${key} = ${value}`);
-                    }
-
-                }
-
-                /*
-                Checkbox - FIXED
-                */
-                else if (fieldType === 'checkbox') {
-
-                    $field.prop('checked', value === true || value === 'true');
-                    console.log(`Checkbox set: ${key} = ${value}`);
-
-                }
-
-                /*
-                Hidden Input - FIXED
-                */
-                else if (fieldType === 'hidden') {
-
-                    $field.val(value);
-                    console.log(`Hidden input set: ${key} = ${value}`);
-
-                }
-
-                /*
-                Normal Fields - FIXED
-                */
-                else {
-
-                    $field.val(value).trigger('change');
-                    console.log(`Field set: ${key} = ${value}`);
-
-                }
-
-            });
 
         });
 
-        // Restore DBA field after loading
-        toggleDbaField();
+        ownerIndexes = [...new Set(ownerIndexes)];
 
-        // Restore custom select text after loading
-        restoreCustomSelectText();
+        const totalOwners = ownerIndexes.length
+            ? Math.max(...ownerIndexes)
+            : 1;
+
+        console.log('Total Owners Found:', totalOwners);
+        let existingOwners = $('.details-card .card-gray').length;
+
+        /*
+        Create Missing Owners
+        */
+
+        while (existingOwners < totalOwners) {
+            $('#add-owner-btn').trigger('click');
+            existingOwners++;
+        }
+
+        /*
+        Wait Until Owners Exist
+        */
+
+        await waitForElement('.details-card .card-gray',totalOwners);
+
+        /*
+        =====================================
+        CLAIMS
+        =====================================
+        */
+
+        const claimData = JSON.parse(localStorage.getItem('step_6_data_inserted') || '{}');
+
+        let totalClaims = 1;
+
+        Object.keys(claimData).forEach(function (key) {
+            if (Array.isArray(claimData[key])) {
+                if (claimData[key].length > totalClaims) {
+                    totalClaims = claimData[key].length;
+                }
+            }
+        });
+
+        console.log('Total Claims Found:', totalClaims);
+        let existingClaims = $('.claim-item').length;
+        /*
+        Create Missing Claims
+        */
+
+        while (existingClaims < totalClaims) {
+            $('#add-claim-btn').trigger('click');
+            existingClaims++;
+        }
+
+        /*
+        Wait Until Claims Exist
+        */
+
+        await waitForElement('.claim-item',totalClaims);
+
+        /*
+        Reinitialize Select
+        */
+
+        initializeCustomSelect();
+
+        console.log('=== Dynamic Sections Restored ===');
+
+    }
+
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function waitForElement(selector, totalExpected) {
+        return new Promise((resolve) => {
+            const interval = setInterval(function () {
+                const total = $(selector).length;
+                if (total >= totalExpected) {
+                    clearInterval(interval);
+                    resolve();
+                }
+            }, 100);
+        });
+    }
+    /*
+    =====================================
+    Restore Single Field
+    =====================================
+    */
+
+    function restoreField($field, value) {
+        const type = $field.attr('type');
+        // Radio
+        if ($field.is(':radio')) {
+            if ($field.val() == value) {
+                $field.prop('checked', true).trigger('change');
+            }
+            return;
+        }
+
+        // Checkbox
+        if (type === 'checkbox') {
+            $field.prop('checked', value === true || value === 'true');
+            return;
+        }
+
+        // Custom Select Hidden Input
+        if (type === 'hidden' && $field.closest('.custom-select').length) {
+            const $wrapper = $field.closest('.custom-select');
+            $field.val(value);
+            const cleanValue = String(value).trim();
+            const $matchedOption = $wrapper.find('.option').filter(function () {
+                return String($(this).data('value')).trim() === cleanValue;
+            });
+
+            if ($matchedOption.length) {
+                $wrapper.find('.selected-text').text($matchedOption.text().trim());
+                $wrapper.find('.option').removeClass('active');
+                $matchedOption.addClass('active');
+                console.log(`✅ Custom select restored: ${value}`);
+            } else {
+                // Option not found set text directly
+                if (value) {
+                    $wrapper.find('.selected-text').text(value);
+                }
+            }
+            return;
+        }
+
+        // Normal Select
+        if ($field.is('select')) {
+            $field.val(value).trigger('change');
+            return;
+        }
+
+        // Normal Input / Textarea
+        $field.val(value).trigger('input').trigger('change');
 
     }
 
     /*
     =====================================
-    Restore Custom Select Text - NEW
+    Load Saved Form Data
     =====================================
     */
 
-    function restoreCustomSelectText() {
-
-        $('.custom-select').each(function () {
-
-            const $customSelect = $(this);
-            const $hiddenInput = $customSelect.find('input[type="hidden"]');
-            const $selectedText = $customSelect.find('.selected-text');
-
-            if ($hiddenInput.length && $hiddenInput.val()) {
-
-                const savedValue = $hiddenInput.val();
-
-                // Find matching option and set text
-                const $matchingOption = $customSelect.find(`.option[data-value="${savedValue}"]`);
-
-                if ($matchingOption.length) {
-                    $selectedText.text($matchingOption.text().trim());
-                    $matchingOption.addClass('active');
-                    console.log(`Custom select restored: ${savedValue}`);
-                }
+    function loadSavedFormData() {
+        console.log('=== Loading Saved Form Data ===');
+        for (let stepNumber = 1; stepNumber <= totalSteps; stepNumber++) {
+            const savedData = localStorage.getItem(`step_${stepNumber}_data_inserted`);
+            if (!savedData) continue;
+            let stepData = {};
+            try {
+                stepData = JSON.parse(savedData);
+            } catch (e) {
+                console.error(`Error parsing step ${stepNumber}`, e);
+                continue;
             }
+            const $step = $(`.form-step-${stepNumber}`);
+            if (!$step.length) continue;
+            console.log(`Restoring step ${stepNumber}:`, stepData);
+            Object.keys(stepData).forEach(function (key) {
+                const value = stepData[key];
+                /*
+                Array Values (claims with [] names)
+                */
+                if (Array.isArray(value)) {
+                    const $fields = $step.find(`[name="${key}"]`);
+                    $fields.each(function (index) {
+                        const fieldValue = value[index];
+                        if (fieldValue === undefined || fieldValue === null) return;
+                        restoreField($(this), fieldValue);
+                        console.log(`✅ Array field restored: ${key}[${index}] = ${fieldValue}`);
+                    });
+                }
 
-        });
+                /*
+                Single Values
+                */
+                else {
+                    if (value === null || value === undefined || value === '') return;
+                    const $fields = $step.find(`[name="${key}"]`);
+                    if (!$fields.length) {
+                        console.warn(`❌ Field not found: ${key} in step ${stepNumber}`);
+                        return;
+                    }
+                    // Radio
+                    if ($fields.is(':radio')) {
+                        $step.find(`[name="${key}"][value="${value}"]`)
+                            .prop('checked', true)
+                            .trigger('change');
+                        console.log(`✅ Radio restored: ${key} = ${value}`);
+                        return;
+                    }
+                    restoreField($fields.first(), value);
+                    console.log(`✅ Field restored: ${key} = ${value}`);
+                }
+            });
+
+        }
+
+        // Restore DBA after all fields loaded
+        toggleDbaField();
+        console.log('=== Restore Complete ===');
 
     }
 
@@ -170,70 +277,58 @@ jQuery(document).ready(function ($) {
     */
 
     async function loadInitialFormData() {
-
         try {
-
             $('.form-loader').addClass('active');
-
             const ajaxData = new FormData();
             ajaxData.append('action', 'load_policy_form_data');
             ajaxData.append('nonce', policy_form.nonce);
-
             const response = await fetch(policy_form.ajax_url, {
                 method: 'POST',
                 body: ajaxData
             });
-
             const result = await response.json();
-            console.log('API Result:', result);
-
             if (result.success) {
-
                 /*
                 Agency Data
                 */
                 const agencyData = result.data.agency_data || [];
                 let agencyOptions = '';
-
                 agencyData.forEach((agency) => {
                     agencyOptions += `
-                        <div 
-                            class="option"
-                            role="option"
-                            data-agency-id="${agency.agencyId}"
-                            data-value="${agency.name}"
-                        >
+                        <div class="option" role="option" data-agency-id="${agency.agencyId}" data-value="${agency.name}">
                             ${agency.name}
                         </div>
                     `;
                 });
-
                 $('.agency-select .options-container').html(agencyOptions);
 
-                /*
-                Default Agency
-                */
                 const savedStepOneData = JSON.parse(
                     localStorage.getItem('step_1_data_inserted') || '{}'
                 );
 
-                if (savedStepOneData && savedStepOneData.agency_location) {
-                    $('.agency-select .selected-text').text(savedStepOneData.agency_location);
+                if (savedStepOneData && savedStepOneData.name) {
+                    $('.agency-select .selected-text').text(savedStepOneData.name);
                     $('#agency_id').val(savedStepOneData.agency_id || '');
                 } else if (agencyData.length > 0) {
-                    $('.agency-select .selected-text').text(agencyData[0].name);
-                    $('#agency_id').val(agencyData[0].agencyId);
-                }
+                        const firstAgency = agencyData[0];
+                        // Update text
+                        $('.agency-select .selected-text').text(firstAgency.agencyName);
+                        // Update hidden input
+                        $('.agency-select input[name="agency"]').val(firstAgency.agencyName);
+                        // Store agency id
+                        $('#agency_id').val(firstAgency.agencyId);
+                        // Add active class
+                        $('.agency-select .option').first().addClass('active');
+                    }
 
                 /*
                 Industry Data
                 */
                 const industryData = result.data.industry_data || [];
                 let industryOptions = '';
-
                 industryData.forEach((industry) => {
                     industryOptions += `
-                        <div 
+                        <div
                             class="option"
                             data-value="${industry.name}"
                             data-sic="${industry.sic || ''}"
@@ -248,9 +343,6 @@ jQuery(document).ready(function ($) {
 
                 $('.industry-select .options-container').html(industryOptions);
 
-                /*
-                Default Industry
-                */
                 if (savedStepOneData && savedStepOneData.industry) {
                     $('.industry-select .selected-text').text(savedStepOneData.industry);
                     $('.industry-select input[name="industry"]').val(savedStepOneData.industry);
@@ -268,14 +360,16 @@ jQuery(document).ready(function ($) {
                     $('#industryCodeId').val(firstIndustry.industryCodeCategoryId || '');
                 }
 
-                /*
-                Initialize Custom Select After API Load
-                */
                 initializeCustomSelect();
 
-                /*
-                Load Saved Form Data After API
-                */
+                // Wait for dynamic sections to be created
+                // then fill all fields
+                await restoreDynamicSections();
+
+                // Reinitialize custom select for new cloned sections
+                initializeCustomSelect();
+
+                // Now fill all fields including cloned ones
                 loadSavedFormData();
 
             }
@@ -297,26 +391,18 @@ jQuery(document).ready(function ($) {
     function initializeCustomSelect() {
 
         const $customSelects = $('.custom-select');
-
         $customSelects.each(function () {
-
             const $customSelect = $(this);
             const $selectBox = $customSelect.find('.select-box');
             const $selectedText = $customSelect.find('.selected-text');
             const $hiddenInput = $customSelect.find('input[type="hidden"]');
 
-            /*
-            Open Dropdown
-            */
             $selectBox.off('click').on('click', function (e) {
                 e.stopPropagation();
                 $customSelects.not($customSelect).removeClass('active');
                 $customSelect.toggleClass('active');
             });
 
-            /*
-            Option Click
-            */
             $customSelect.find('.option').off('click').on('click', function () {
 
                 const $option = $(this);
@@ -328,9 +414,6 @@ jQuery(document).ready(function ($) {
                     $hiddenInput.val(value);
                 }
 
-                /*
-                Industry Fields Auto Fill
-                */
                 if ($customSelect.hasClass('industry-select')) {
                     $('#sic_code').val($option.data('sic') || '');
                     $('#naics_code').val($option.data('naics') || '');
@@ -338,9 +421,6 @@ jQuery(document).ready(function ($) {
                     $('#industryCodeId').val($option.data('industrycodecategoryid') || '');
                 }
 
-                /*
-                Agency ID Auto Fill
-                */
                 if ($customSelect.hasClass('agency-select')) {
                     $('#agency_id').val($option.data('agency-id') || '');
                 }
@@ -373,29 +453,23 @@ jQuery(document).ready(function ($) {
 
     function updateSteps() {
 
-        // Hide All Steps
         $('.form-step').removeClass('active');
         $('.step-item').removeClass('active').addClass('disabled');
 
-        // Show Current Step
         $(`.form-step-${currentStep}`).addClass('active');
         $('.step-item').eq(currentStep - 1).addClass('active').removeClass('disabled');
 
-        // Back Button
         if (currentStep === 1) {
             $backBtn.addClass('disabled').prop('disabled', true);
         } else {
             $backBtn.removeClass('disabled').prop('disabled', false);
         }
 
-        // Next Button Text
         if (currentStep === totalSteps) {
             $nextBtn.html(`Submit <i class="fa-solid fa-check"></i>`);
         } else {
             $nextBtn.html(`Save & Continue <i class="fa-solid fa-arrow-right"></i>`);
         }
-
-        console.log('Current Step Updated:', currentStep);
 
     }
 
@@ -409,23 +483,41 @@ jQuery(document).ready(function ($) {
 
         const $activeStep = $(`.form-step-${currentStep}`);
         const $fields = $activeStep.find('input, select, textarea');
+
         let formData = {};
 
         $fields.each(function () {
 
             const $field = $(this);
             const name = $field.attr('name');
-
             if (!name) return;
 
-            if ($field.attr('type') === 'radio') {
+            const type = $field.attr('type');
+
+            if (type === 'radio') {
+
                 if ($field.is(':checked')) {
+                    if (name.includes('[]')) {
+                        if (!formData[name]) formData[name] = [];
+                        formData[name].push($field.val());
+                    } else {
+                        formData[name] = $field.val();
+                    }
+                }
+
+            } else if (type === 'checkbox') {
+
+                formData[name] = $field.is(':checked');
+
+            } else {
+
+                if (name.includes('[]')) {
+                    if (!formData[name]) formData[name] = [];
+                    formData[name].push($field.val());
+                } else {
                     formData[name] = $field.val();
                 }
-            } else if ($field.attr('type') === 'checkbox') {
-                formData[name] = $field.is(':checked');
-            } else {
-                formData[name] = $field.val();
+
             }
 
         });
@@ -443,33 +535,50 @@ jQuery(document).ready(function ($) {
     $nextBtn.on('click', async function (e) {
 
         e.preventDefault();
+        if (!validateCurrentStep()) {
+            return;
+        }
 
         if ($nextBtn.hasClass('loading')) return;
 
         const stepData = getStepData();
-        console.log('Step Data:', stepData);
 
-        // Save to LocalStorage
-        localStorage.setItem(
-            `step_${currentStep}_data_inserted`,
-            JSON.stringify(stepData)
-        );
+        const savedStepData = localStorage.getItem(`step_${currentStep}_data_inserted`);
+        const isDataSame = savedStepData && JSON.stringify(stepData) === savedStepData;
+        const isApiSubmitted = localStorage.getItem(`step_${currentStep}_api_submitted`) === 'true';
 
-        // Loading State
+        if (isDataSame && isApiSubmitted) {
+
+            if (currentStep < totalSteps) {
+                currentStep++;
+                localStorage.setItem('current_form_step', currentStep);
+                updateSteps();
+                $('html, body').animate({ scrollTop: $('.stepper-wrapper').offset().top - 100 }, 500);
+            } else {
+                $form.submit();
+            }
+
+            return;
+
+        }
+
+        localStorage.setItem(`step_${currentStep}_data_inserted`, JSON.stringify(stepData));
+
         $nextBtn.addClass('loading').prop('disabled', true).text('Processing...');
 
         try {
 
             const ajaxData = new FormData();
-            
             ajaxData.append('step', currentStep);
-            if(currentStep == 1){
+
+            if (currentStep == 1) {
                 ajaxData.append('action', 'create_policy_step');
                 ajaxData.append('nonce', policy_form.nonce);
-            }else {
+            } else {
                 ajaxData.append('action', 'save_policy_step');
                 ajaxData.append('nonce', policy_form.nonce);
             }
+
             ajaxData.append('form_data', JSON.stringify(stepData));
 
             const response = await fetch(policy_form.ajax_url, {
@@ -478,34 +587,25 @@ jQuery(document).ready(function ($) {
             });
 
             const result = await response.json();
-            console.log('Save Result:', result);
 
             if (result.success) {
 
+                localStorage.setItem(`step_${currentStep}_api_response`, JSON.stringify(result.data));
+                localStorage.setItem(`step_${currentStep}_api_submitted`, 'true');
+
                 if (currentStep < totalSteps) {
-
                     currentStep++;
-
-                    // Save Current Step to LocalStorage
                     localStorage.setItem('current_form_step', currentStep);
-
                     updateSteps();
-
-                    // Scroll to top
-                    $('html, body').animate({
-                        scrollTop: $('.stepper-wrapper').offset().top - 100
-                    }, 500);
-
+                    $('html, body').animate({ scrollTop: $('.stepper-wrapper').offset().top - 100 }, 500);
                 } else {
-
-                    // Final Submit - Clear LocalStorage
                     localStorage.removeItem('current_form_step');
                     for (let i = 1; i <= totalSteps; i++) {
                         localStorage.removeItem(`step_${i}_data_inserted`);
+                        localStorage.removeItem(`step_${i}_api_submitted`);
+                        localStorage.removeItem(`step_${i}_api_response`);
                     }
-
                     $form.submit();
-
                 }
 
             } else {
@@ -524,6 +624,121 @@ jQuery(document).ready(function ($) {
 
     /*
     =====================================
+    Validate Current Step
+    =====================================
+    */
+
+    function validateCurrentStep() {
+
+        let isValid = true;
+
+        const $activeStep = $(`.form-step-${currentStep}`);
+
+        /*
+        Remove old errors
+        */
+
+        $activeStep.find('.field-error').removeClass('field-error');
+
+        /*
+        =====================================
+        Validate Required Fields
+        =====================================
+        */
+
+        $activeStep.find('.asteric').each(function () {
+
+            const $label = $(this).closest('label');
+
+            /*
+            Find related field
+            */
+
+            let $fieldWrapper = $label.closest('.form-group');
+
+            if (!$fieldWrapper.length) return;
+
+            /*
+            =====================================
+            Custom Select
+            =====================================
+            */
+
+            const $hiddenInput = $fieldWrapper.find('.custom-select input[type="hidden"]');
+
+            if ($hiddenInput.length) {
+
+                if (!$hiddenInput.val().trim()) {
+
+                    isValid = false;
+
+                    $fieldWrapper.find('.custom-select')
+                        .addClass('field-error');
+
+                }
+
+                return;
+            }
+
+            /*
+            =====================================
+            Radio Buttons
+            =====================================
+            */
+
+            const $radios = $fieldWrapper.find('input[type="radio"]');
+
+            if ($radios.length) {
+
+                const radioName = $radios.first().attr('name');
+
+                if (!$activeStep.find(`input[name="${radioName}"]:checked`).length) {
+
+                    isValid = false;
+
+                    $fieldWrapper.find('.toggle-btn-group').addClass('field-error');
+
+                }
+
+                return;
+            }
+
+            /*
+            =====================================
+            Normal Inputs / Textarea
+            =====================================
+            */
+
+            const $field = $fieldWrapper.find('input, textarea, select').not('[type="hidden"]').first();
+            if ($field.length) {
+                if (!$field.val().trim()) {
+                    isValid = false;
+                    $field.addClass('field-error');
+                }
+            }
+
+        });
+
+        /*
+        Scroll to first error
+        */
+
+       if (!isValid) {
+            const $firstError = $activeStep.find('.field-error').first();
+            if ($firstError.hasClass('custom-select')) {
+                $firstError.find('.select-box').focus();
+            } else if ($firstError.hasClass('toggle-btn-group')) {
+                $firstError.find('input[type="radio"]').first().focus();
+            } else {
+                $firstError.focus();
+            }
+        }
+        return isValid;
+
+    }
+
+    /*
+    =====================================
     Back Button Click
     =====================================
     */
@@ -533,25 +748,17 @@ jQuery(document).ready(function ($) {
         e.preventDefault();
 
         if (currentStep > 1) {
-
             currentStep--;
-
             localStorage.setItem('current_form_step', currentStep);
-
             updateSteps();
-
-            $('html, body').animate({
-                scrollTop: $('.stepper-wrapper').offset().top - 100
-            }, 500);
-
+            $('html, body').animate({ scrollTop: $('.stepper-wrapper').offset().top - 100 }, 500);
         }
 
     });
 
     /*
     =====================================
-    Page Visibility Change - NEW
-    Handles tab switching and page refresh
+    Page Visibility Change
     =====================================
     */
 
@@ -572,23 +779,8 @@ jQuery(document).ready(function ($) {
     =====================================
     */
 
-    // Restore current step from localStorage
     currentStep = parseInt(localStorage.getItem('current_form_step')) || 1;
-    console.log('Restored Step:', currentStep);
-
-    const savedStepOneData = localStorage.getItem('step_1_data_inserted');
-
-    if (!savedStepOneData) {
-        // No saved data - load from API
-        loadInitialFormData();
-    } else {
-        // Has saved data - restore without API
-        loadInitialFormData().then(() => {
-            loadSavedFormData();
-        });
-    }
-
-    // Update steps UI
     updateSteps();
+    loadInitialFormData();
 
 });

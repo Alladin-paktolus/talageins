@@ -1227,3 +1227,17 @@ flex-direction: column;
     overflow: auto;
     overflow-x: hidden;
 }
+
+.field-error {
+    border: 1px solid red !important;
+}
+
+.custom-select.field-error .select-box {
+    border: 1px solid red !important;
+}
+
+.toggle-btn-group.field-error {
+    padding: 10px;
+    border: 1px solid red;
+    border-radius: 8px;
+}

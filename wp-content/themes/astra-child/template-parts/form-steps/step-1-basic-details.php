@@ -9,12 +9,13 @@
       <label> Agency <span class="asteric">*</span>
       </label>
       <div class="custom-select agency-select">
+        <input type="hidden" name="agency" value="">
         <div class="select-box" tabindex="0" role="button" aria-haspopup="listbox" aria-expanded="false">
-          <span class="selected-text"> Confie Insurance Group </span>
+          <span class="selected-text"> Select Agency </span>
           <i class="fa-solid fa-chevron-down arrow-icon" aria-hidden="true"></i>
         </div>
         <div class="options-container" role="listbox">
-          <div class="option active" role="option"> Confie Insurance Group </div>
+          <div class="option" role="option"></div>
         </div>
       </div>
     </div>
@@ -24,13 +25,13 @@
       <label> Agency Location <span class="asteric">*</span>
       </label>
       <div class="custom-select">
-        <input type="hidden" name="agency_location" value="Los Angeles, CA - 555 W 5th St">
+        <input type="hidden" name="agency_location" value="">
         <div class="select-box" tabindex="0" role="button">
           <span class="selected-text"> Los Angeles, CA - 555 W 5th St </span>
           <i class="fa-solid fa-chevron-down arrow-icon"></i>
         </div>
         <div class="options-container">
-          <div class="option active" data-value="Los Angeles, CA - 555 W 5th St"> Los Angeles, CA - 555 W 5th St </div>
+          <div class="option" data-value="Los Angeles, CA - 555 W 5th St"> Los Angeles, CA - 555 W 5th St </div>
           <div class="option" data-value="New York, NY - 100 Park Ave"> New York, NY - 100 Park Ave </div>
         </div>
       </div>

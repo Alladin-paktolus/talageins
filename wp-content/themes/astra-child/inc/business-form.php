@@ -42,17 +42,24 @@ function load_policy_form_data() {
 add_action('wp_ajax_save_policy_step', 'talage_save_policy_step');
 add_action('wp_ajax_nopriv_save_policy_step', 'talage_save_policy_step');
 function talage_save_policy_step() {
+    $step = isset($_POST['step'])
+        ? absint($_POST['step'])
+        : 1;
+
+    $form_data = isset($_POST['form_data'])
+        ? json_decode(stripslashes($_POST['form_data']), true)
+        : array();
+
      wp_send_json_success(array(
         'message' => 'Step saved successfully.',
-        'step'    => 2,
-        'data'    => 'new',
+        'step'    => $step,
+        'data'    => $form_data,
     ));
 }
 
 add_action('wp_ajax_create_policy_step', 'talage_create_policy_step');
 add_action('wp_ajax_nopriv_create_policy_step', 'talage_create_policy_step');
 function talage_create_policy_step() {
-
     // Verify Nonce
     check_ajax_referer('policy_form_nonce', 'nonce');
 
