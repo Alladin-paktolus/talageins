@@ -1,17 +1,17 @@
 <div class="form-container">
-  <div class="details-card gap-32">
+  <div class="details-card gap-32 locations-wrapper">
     <div class="heading-section">
       <div class="form-title">
         <h2>Operations</h2>
         <p>Add each location where the business operates.</p>
       </div>
-      <button type="button" class="btn btn-outline add-owner-btn">
+      <button type="button" class="btn btn-outline add-location-btn">
         <i class="fa fa-plus" aria-hidden="true"></i> Add Location </button>
     </div>
     <!-- =========================
         LOCATION 1
         ========================= -->
-    <div class="card-gray gap-26">
+    <div class="card-gray gap-26 location-item">
       <div class="owner-name full-width mb-16">
         <h4>Location 1</h4>
         <i class="fa fa-times close-icon" aria-hidden="true"></i>
@@ -109,7 +109,7 @@
     <!-- =========================
         LOCATION 2
         ========================= -->
-    <div class="card-gray gap-26">
+    <div class="card-gray gap-26 location-item">
       <div class="owner-name full-width mb-16">
         <h4>Location 2</h4>
         <i class="fa fa-times close-icon" aria-hidden="true"></i>

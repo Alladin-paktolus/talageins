@@ -72,7 +72,7 @@
         </button>
     </div>
     <!-- OWNER 1 -->
-    <div class="card-gray gap-24">
+    <div class="card-gray gap-24 owner-item">
       <div class="owner-name full-width">
         <h4>Owner 1</h4>
         <i class="fa fa-times close-icon" aria-hidden="true"></i>
@@ -112,7 +112,7 @@
       </div>
     </div>
     <!-- OWNER 2 -->
-    <div class="card-gray gap-32">
+    <div class="card-gray gap-32 owner-item">
       <div class="owner-name full-width">
         <h4>Owner 2</h4>
         <i class="fa fa-times close-icon" aria-hidden="true"></i>

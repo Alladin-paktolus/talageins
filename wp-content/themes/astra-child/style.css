@@ -787,7 +787,8 @@ h3 {
   flex-direction: column;
 }
 .heading-section,
-.owner-name {
+.owner-name,
+.claim-name {
   display: flex;
   justify-content: space-between;
 }

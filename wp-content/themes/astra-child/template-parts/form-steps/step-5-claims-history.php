@@ -45,7 +45,7 @@
     </div>
     <!-- CLAIM ITEM -->
     <div class="card-gray gap-24 claim-item" data-claim="1">
-      <div class="owner-name full-width">
+      <div class="claim-name full-width">
         <h4>Claim #1</h4>
         <i class="fa fa-times close-icon"></i>
       </div>

@@ -1,10 +1,6 @@
 jQuery(document).ready(function ($) {
 
-    /*
-    =====================================
-    Variables
-    =====================================
-    */
+    /*    Variables    */
 
     let currentStep = parseInt(localStorage.getItem('current_form_step')) || 1;
     const totalSteps = 8;
@@ -12,11 +8,7 @@ jQuery(document).ready(function ($) {
     const $nextBtn = $('.next-btn');
     const $backBtn = $('.back-btn');
 
-    /*
-    =====================================
-    DBA Toggle
-    =====================================
-    */
+    /*    DBA Toggle    */
 
     function toggleDbaField() {
         if ($("#dba-yes").is(":checked")) {
@@ -32,25 +24,18 @@ jQuery(document).ready(function ($) {
 
     toggleDbaField();
 
-    /*
-    =====================================
-    Restore Dynamic Sections
-    =====================================
-    */
+    /*    Restore Dynamic Sections    */
    
 
     async function restoreDynamicSections() {
 
         console.log('=== Restoring Dynamic Sections ===');
 
-        /*
-        =====================================
-        OWNERS
-        =====================================
-        */
-
+        /* OWNERS - FIXED   */
+        let current_step = localStorage.getItem('current_form_step');
+        // Get owner data from step 3
         const ownerData = JSON.parse(
-            localStorage.getItem('step_3_data_inserted') || '{}'
+            localStorage.getItem(`step_${current_step}_data_inserted`) || '{}'
         );
 
         let ownerIndexes = [];
@@ -60,71 +45,146 @@ jQuery(document).ready(function ($) {
             if (match && match[1]) {
                 ownerIndexes.push(parseInt(match[1]));
             }
-
         });
 
         ownerIndexes = [...new Set(ownerIndexes)];
 
-        const totalOwners = ownerIndexes.length
-            ? Math.max(...ownerIndexes)
-            : 1;
+        const ownersByIndex = ownerIndexes.length ? Math.max(...ownerIndexes) : 1;
+        const ownersByCount = parseInt(localStorage.getItem('total_owners')) || 1;
+        const totalOwners = Math.max(ownersByIndex, ownersByCount);
 
-        console.log('Total Owners Found:', totalOwners);
-        let existingOwners = $('.details-card .card-gray').length;
+        console.log('=== OWNERS DEBUG ===');
+        console.log('ownersByIndex:', ownersByIndex);
+        console.log('ownersByCount:', ownersByCount);
+        console.log('totalOwners:', totalOwners);
+        console.log('Owner button found:', $('#add-owner-btn').length);
+        //console.log('Existing owners:', $('.details-card .card-gray').length);
+        console.log('Existing owners:', $('.owners-wrapper .owner-item').length);
 
-        /*
-        Create Missing Owners
-        */
+        let existingOwners = $('.owners-wrapper .owner-item').length;
+        if (totalOwners > existingOwners) {
 
-        while (existingOwners < totalOwners) {
-            $('#add-owner-btn').trigger('click');
-            existingOwners++;
+            for (let i = existingOwners; i < totalOwners; i++) {
+
+                console.log(`Clicking add-owner-btn for owner ${i + 1}`);
+
+                // ✅ Try multiple selectors to find the button
+                const $ownerBtn = $('#add-owner-btn').length
+                    ? $('#add-owner-btn')
+                    : $('[data-action="add-owner"]');
+
+                if ($ownerBtn.length) {
+                    $ownerBtn.trigger('click');
+                    await delay(200); // Wait after each click
+                } else {
+                    console.error('❌ #add-owner-btn not found!');
+                }
+
+            }
+
+            // Wait for owners to appear in DOM
+            await waitForElement('.owners-wrapper .owner-item', totalOwners);
+
         }
 
-        /*
-        Wait Until Owners Exist
-        */
+        console.log('Owners after restore:', $('.owners-wrapper .owner-item').length);
 
-        await waitForElement('.details-card .card-gray',totalOwners);
+        /* CLAIMS - FIXED   */
+        const claimData = JSON.parse(
+            localStorage.getItem('step_6_data_inserted') || '{}'
+        );
 
-        /*
-        =====================================
-        CLAIMS
-        =====================================
-        */
-
-        const claimData = JSON.parse(localStorage.getItem('step_6_data_inserted') || '{}');
-
-        let totalClaims = 1;
+        let claimsByData = 1;
 
         Object.keys(claimData).forEach(function (key) {
             if (Array.isArray(claimData[key])) {
-                if (claimData[key].length > totalClaims) {
-                    totalClaims = claimData[key].length;
+                if (claimData[key].length > claimsByData) {
+                    claimsByData = claimData[key].length;
                 }
             }
         });
 
-        console.log('Total Claims Found:', totalClaims);
-        let existingClaims = $('.claim-item').length;
-        /*
-        Create Missing Claims
-        */
+        const claimsByCount = parseInt(localStorage.getItem('total_claims')) || 1;
+        const totalClaims = Math.max(claimsByData, claimsByCount);
 
-        while (existingClaims < totalClaims) {
-            $('#add-claim-btn').trigger('click');
-            existingClaims++;
+        console.log('=== CLAIMS DEBUG ===');
+        console.log('claimsByData:', claimsByData);
+        console.log('claimsByCount:', claimsByCount);
+        console.log('totalClaims:', totalClaims);
+        console.log('Claim button found:', $('#add-claim-btn').length);
+        console.log('Existing claims:', $('.claim-item').length);
+
+        let existingClaims = $('.claim-item').length;
+
+        if (totalClaims > existingClaims) {
+
+            for (let i = existingClaims; i < totalClaims; i++) {
+
+                console.log(`Clicking add-claim-btn for claim ${i + 1}`);
+
+                $('#add-claim-btn').trigger('click');
+
+                await delay(200);
+
+            }
+
+            await waitForElement('.claim-item', totalClaims);
+
         }
 
-        /*
-        Wait Until Claims Exist
-        */
+        console.log('Claims after restore:', $('.claim-item').length);
 
-        await waitForElement('.claim-item',totalClaims);
+        /* LOCATIONS - FIXED */
 
-        /*
-        Reinitialize Select
-        */
+        const locationData = JSON.parse(
+            localStorage.getItem(`step_${current_step}_data_inserted`) || '{}'
+        );
+
+        let locationIndexes = [];
+
+        /* Find all location indexes */
+        Object.keys(locationData).forEach(function (key) {
+            const match = key.match(/location_(\d+)_/);
+            if (match && match[1]) {
+                locationIndexes.push(parseInt(match[1]));
+            }
+        });
+
+        locationIndexes = [...new Set(locationIndexes)];
+        const locationsByIndex = locationIndexes.length ? Math.max(...locationIndexes) : 1;
+
+        const locationsByCount = parseInt(localStorage.getItem('total_locations')) || 1;
+
+        const totalLocations = Math.max(locationsByIndex, locationsByCount);
+
+        console.log('=== LOCATIONS DEBUG ===');
+        console.log('locationsByIndex:', locationsByIndex);
+        console.log('locationsByCount:', locationsByCount);
+        console.log('totalLocations:', totalLocations);
+        console.log( 'Location button found:', $('.add-location-btn').length );
+
+        console.log('Existing locations:', $('.locations-wrapper .location-item').length  );
+
+        let existingLocations = $('.locations-wrapper .location-item').length;
+
+        /* Add missing locations */
+
+        if (totalLocations > existingLocations) {
+            for ( let i = existingLocations; i < totalLocations; i++ ) {
+                console.log( `Clicking add-location-btn for location ${i + 1}` );
+                const $locationBtn = $('.add-location-btn');
+                if ($locationBtn.length) {
+                    $locationBtn.trigger('click');
+                    await delay(200);
+                } else {
+                    console.error('❌ .add-location-btn not found!' );
+                }
+            }
+            /* Wait until all location items exist */
+            await waitForElement('.locations-wrapper .location-item',totalLocations );
+        }
+
+        console.log( 'Locations after restore:', $('.locations-wrapper .location-item').length);
 
         initializeCustomSelect();
 
@@ -147,15 +207,18 @@ jQuery(document).ready(function ($) {
             }, 100);
         });
     }
-    /*
-    =====================================
-    Restore Single Field
-    =====================================
-    */
+    /* Restore Single Field   */
 
     function restoreField($field, value) {
+
         const type = $field.attr('type');
-        // Radio
+         /Skip File Input*/
+         if (type === 'file') {
+             // Browser security restriction 
+             // File input value cannot be restored 
+            return;
+        }
+
         if ($field.is(':radio')) {
             if ($field.val() == value) {
                 $field.prop('checked', true).trigger('change');
@@ -203,11 +266,7 @@ jQuery(document).ready(function ($) {
 
     }
 
-    /*
-    =====================================
-    Load Saved Form Data
-    =====================================
-    */
+    /*    Load Saved Form Data    */
 
     function loadSavedFormData() {
         console.log('=== Loading Saved Form Data ===');
@@ -270,11 +329,7 @@ jQuery(document).ready(function ($) {
 
     }
 
-    /*
-    =====================================
-    Load API Data
-    =====================================
-    */
+    /*    Load API Data    */
 
     async function loadInitialFormData() {
         try {
@@ -360,17 +415,21 @@ jQuery(document).ready(function ($) {
                     $('#industryCodeId').val(firstIndustry.industryCodeCategoryId || '');
                 }
 
-                initializeCustomSelect();
+                // initializeCustomSelect();
 
-                // Wait for dynamic sections to be created
-                // then fill all fields
+                // // Wait for dynamic sections to be created
+                // // then fill all fields
+                // await restoreDynamicSections();
+
+                // // Reinitialize custom select for new cloned sections
+                // initializeCustomSelect();
+
+                // // Now fill all fields including cloned ones
+                // loadSavedFormData();
+
                 await restoreDynamicSections();
-
-                // Reinitialize custom select for new cloned sections
-                initializeCustomSelect();
-
-                // Now fill all fields including cloned ones
                 loadSavedFormData();
+                initializeCustomSelect();
 
             }
 
@@ -382,11 +441,7 @@ jQuery(document).ready(function ($) {
 
     }
 
-    /*
-    =====================================
-    Custom Select Initialize
-    =====================================
-    */
+    /*    Custom Select Initialize    */
 
     function initializeCustomSelect() {
 
@@ -435,21 +490,13 @@ jQuery(document).ready(function ($) {
 
     }
 
-    /*
-    =====================================
-    Close Dropdown Outside Click
-    =====================================
-    */
+    /*    Close Dropdown Outside Click    */
 
     $(document).on('click', function () {
         $('.custom-select').removeClass('active');
     });
 
-    /*
-    =====================================
-    Update Steps
-    =====================================
-    */
+    /*    Update Steps    */
 
     function updateSteps() {
 
@@ -473,11 +520,7 @@ jQuery(document).ready(function ($) {
 
     }
 
-    /*
-    =====================================
-    Get Step Data
-    =====================================
-    */
+    /*    Get Step Data    */
 
     function getStepData() {
 
@@ -493,7 +536,9 @@ jQuery(document).ready(function ($) {
             if (!name) return;
 
             const type = $field.attr('type');
-
+            if (type === 'file') {
+                return;
+            }   
             if (type === 'radio') {
 
                 if ($field.is(':checked')) {
@@ -526,11 +571,7 @@ jQuery(document).ready(function ($) {
 
     }
 
-    /*
-    =====================================
-    Next Button Click
-    =====================================
-    */
+    /*    Next Button Click    */
 
     $nextBtn.on('click', async function (e) {
 
@@ -563,7 +604,6 @@ jQuery(document).ready(function ($) {
         }
 
         localStorage.setItem(`step_${currentStep}_data_inserted`, JSON.stringify(stepData));
-
         $nextBtn.addClass('loading').prop('disabled', true).text('Processing...');
 
         try {
@@ -599,7 +639,9 @@ jQuery(document).ready(function ($) {
                     updateSteps();
                     $('html, body').animate({ scrollTop: $('.stepper-wrapper').offset().top - 100 }, 500);
                 } else {
-                    localStorage.removeItem('current_form_step');
+                     localStorage.removeItem('current_form_step');
+                    localStorage.removeItem('total_owners'); // ✅ Add this
+                    localStorage.removeItem('total_claims'); // ✅ Add this
                     for (let i = 1; i <= totalSteps; i++) {
                         localStorage.removeItem(`step_${i}_data_inserted`);
                         localStorage.removeItem(`step_${i}_api_submitted`);
@@ -622,11 +664,7 @@ jQuery(document).ready(function ($) {
 
     });
 
-    /*
-    =====================================
-    Validate Current Step
-    =====================================
-    */
+    /*    Validate Current Step    */
 
     function validateCurrentStep() {
 
@@ -640,11 +678,7 @@ jQuery(document).ready(function ($) {
 
         $activeStep.find('.field-error').removeClass('field-error');
 
-        /*
-        =====================================
-        Validate Required Fields
-        =====================================
-        */
+        /* Validate Required Fields   */
 
         $activeStep.find('.asteric').each(function () {
 
@@ -658,11 +692,7 @@ jQuery(document).ready(function ($) {
 
             if (!$fieldWrapper.length) return;
 
-            /*
-            =====================================
-            Custom Select
-            =====================================
-            */
+            /*            Custom Select            */
 
             const $hiddenInput = $fieldWrapper.find('.custom-select input[type="hidden"]');
 
@@ -680,11 +710,7 @@ jQuery(document).ready(function ($) {
                 return;
             }
 
-            /*
-            =====================================
-            Radio Buttons
-            =====================================
-            */
+            /*            Radio Buttons            */
 
             const $radios = $fieldWrapper.find('input[type="radio"]');
 
@@ -703,11 +729,7 @@ jQuery(document).ready(function ($) {
                 return;
             }
 
-            /*
-            =====================================
-            Normal Inputs / Textarea
-            =====================================
-            */
+            /*            Normal Inputs / Textarea            */
 
             const $field = $fieldWrapper.find('input, textarea, select').not('[type="hidden"]').first();
             if ($field.length) {
@@ -737,11 +759,7 @@ jQuery(document).ready(function ($) {
 
     }
 
-    /*
-    =====================================
-    Back Button Click
-    =====================================
-    */
+    /*    Back Button Click    */
 
     $backBtn.on('click', function (e) {
 
@@ -756,11 +774,7 @@ jQuery(document).ready(function ($) {
 
     });
 
-    /*
-    =====================================
-    Page Visibility Change
-    =====================================
-    */
+    /*    Page Visibility Change    */
 
     document.addEventListener('visibilitychange', function () {
         if (!document.hidden) {
@@ -773,11 +787,7 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    /*
-    =====================================
-    Initialize
-    =====================================
-    */
+    /*    Initialize    */
 
     currentStep = parseInt(localStorage.getItem('current_form_step')) || 1;
     updateSteps();
