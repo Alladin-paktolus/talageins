@@ -1,4 +1,4 @@
-<div class="form-step form-step-7">
+<div class="form-step form-step-7 policy-underwriting-question" data-set="GL" style="display: none;">
   <div class="form-container">
     <div class="form-heading">
       <h2>Underwriting Questions</h2>
@@ -100,3 +100,4 @@
     </div>
   </div>
 </div>
+ <?php get_template_part( 'template-parts/form-steps/step-7', 'underwriting-questions-bop' ); ?>

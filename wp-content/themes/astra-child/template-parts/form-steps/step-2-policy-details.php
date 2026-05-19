@@ -7,7 +7,7 @@
   <div class="form-group full-width">
     <label> Select Policy Type <span class="asteric">*</span>
     </label>
-    <div class="checkbox-group-wrapper">
+    <div class="checkbox-group-wrapper select-policy-type">
       <!-- BOP -->
       <label class="custom-checkbox">
         <input type="checkbox" name="policy_type_bop" value="BOP" />
@@ -79,7 +79,7 @@
     </div>
   </div>
   <hr class="mb-8" />
-  <div class="form-grid">
+  <div class="form-grid policy-form" data-set="GL">
     <!-- GL POLICY -->
     <div class="form-group full-width radio-button">
       <label class="radio-btn-label"> Do you have a General Liability Policy today? <span class="asteric">*</span>
@@ -112,4 +112,39 @@
       <input type="text" name="years_with_gl" />
     </div>
   </div>
+  
+   <fieldset class="form-grid policy-form" data-set="BOP" style="display:none;">
+      <div class="form-group full-width radio-button">
+        <legend class="radio-btn-label" id="bop-policy-label"> 
+          <div> Do you have a Business Owners Policy today? <span class="asteric" aria-hidden="true">*</span> </div>
+        </legend>
+        <div class="toggle-btn-group" role="radiogroup" aria-labelledby="bop-policy-label">
+          <!-- YES -->
+          <input type="radio" name="bop-policy" value="yes" id="bop-policy-yes" class="sr-only" />
+          <label for="bop-policy-yes" class="toggle-btn"> YES </label>
+          <!-- NO -->
+          <input type="radio" name="bop-policy" value="no" id="bop-policy-no" class="sr-only" checked />
+          <label for="bop-policy-no" class="toggle-btn"> NO </label>
+        </div>
+      </div>
+      <!-- PREMIUM -->
+      
+      <div class="form-group">
+        <label for="premium-input"> How much are you currently paying in premium? <span class="asteric" aria-hidden="true">*</span>
+        </label>
+        <input id="premium-input" type="text" placeholder="$" inputmode="numeric" aria-required="true" required />
+      </div>
+      <!-- CURRENT CARRIER -->
+      <div class="form-group">
+        <label for="current-carrier"> Who is your current insurance carrier? <span class="asteric" aria-hidden="true">*</span>
+        </label>
+        <input id="current-carrier" type="text" autocomplete="organization" aria-required="true" required />
+      </div>
+      <!-- YEARS WITH GL -->
+      <div class="form-group">
+        <label for="years-gl"> Years with BOP Insurance? <span class="asteric" aria-hidden="true">*</span>
+        </label>
+        <input id="years-gl" type="text" inputmode="numeric" aria-required="true" required />
+      </div>
+    </fieldset>
 </div>

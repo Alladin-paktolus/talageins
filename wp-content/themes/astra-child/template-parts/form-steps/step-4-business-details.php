@@ -36,8 +36,13 @@
       <label>Annual Sales</label>
       <input type="text" name="annual_sales" autocomplete="off" inputmode="numeric" />
     </div>
+    <div class="form-group policy-business-details" data-set="BOP">
+      <label for="founded-year"> Founded Year <span class="asteric" aria-hidden="true"> * </span>
+      </label>
+      <input id="founded-year" type="text" placeholder="YYYY"  name="founded_year" inputmode="numeric" maxlength="4" aria-required="true" required />
+    </div>
     <!-- WEBSITE AVAILABLE -->
-    <div class="form-group full-width radio-button">
+    <div class="form-group full-width radio-button" >
       <label class="radio-btn-label"> Do you have a website? <span class="asteric">*</span>
       </label>
       <div class="toggle-btn-group">
@@ -50,13 +55,13 @@
       </div>
     </div>
     <!-- WEBSITE URL -->
-    <div class="form-group">
+    <div class="form-group website-url-field" style="display:none;">
       <label> Website URL <span class="asteric">*</span>
       </label>
       <input type="url" name="website_url" placeholder="https://" autocomplete="url" />
     </div>
     <!-- FOUNDED YEAR -->
-    <div class="form-group">
+     <div class="form-group policy-business-details" data-set="GL" style="display:none;">
       <label> Founded Year <span class="asteric">*</span>
       </label>
       <input type="text" name="founded_year" placeholder="YYYY" inputmode="numeric" maxlength="4" />
@@ -104,7 +109,7 @@
           </div>
         </div>
         <!-- OFFICER PAYROLL -->
-        <div class="form-group">
+        <div class="form-group policy-business-details" data-set="GL" style="display:none;">
           <label> Officer Payroll <span class="asteric">*</span>
           </label>
           <input type="text" name="owner_1_officer_payroll" placeholder="0" inputmode="numeric" />

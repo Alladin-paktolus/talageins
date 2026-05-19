@@ -68,7 +68,7 @@ jQuery(document).ready(function ($) {
 
                 console.log(`Clicking add-owner-btn for owner ${i + 1}`);
 
-                // ✅ Try multiple selectors to find the button
+                //  Try multiple selectors to find the button
                 const $ownerBtn = $('#add-owner-btn').length
                     ? $('#add-owner-btn')
                     : $('[data-action="add-owner"]');
@@ -77,7 +77,7 @@ jQuery(document).ready(function ($) {
                     $ownerBtn.trigger('click');
                     await delay(200); // Wait after each click
                 } else {
-                    console.error('❌ #add-owner-btn not found!');
+                    console.error(' #add-owner-btn not found!');
                 }
 
             }
@@ -177,7 +177,7 @@ jQuery(document).ready(function ($) {
                     $locationBtn.trigger('click');
                     await delay(200);
                 } else {
-                    console.error('❌ .add-location-btn not found!' );
+                    console.error(' .add-location-btn not found!' );
                 }
             }
             /* Wait until all location items exist */
@@ -245,7 +245,7 @@ jQuery(document).ready(function ($) {
                 $wrapper.find('.selected-text').text($matchedOption.text().trim());
                 $wrapper.find('.option').removeClass('active');
                 $matchedOption.addClass('active');
-                console.log(`✅ Custom select restored: ${value}`);
+                console.log(` Custom select restored: ${value}`);
             } else {
                 // Option not found set text directly
                 if (value) {
@@ -294,7 +294,7 @@ jQuery(document).ready(function ($) {
                         const fieldValue = value[index];
                         if (fieldValue === undefined || fieldValue === null) return;
                         restoreField($(this), fieldValue);
-                        console.log(`✅ Array field restored: ${key}[${index}] = ${fieldValue}`);
+                        console.log(` Array field restored: ${key}[${index}] = ${fieldValue}`);
                     });
                 }
 
@@ -305,7 +305,7 @@ jQuery(document).ready(function ($) {
                     if (value === null || value === undefined || value === '') return;
                     const $fields = $step.find(`[name="${key}"]`);
                     if (!$fields.length) {
-                        console.warn(`❌ Field not found: ${key} in step ${stepNumber}`);
+                        console.warn(` Field not found: ${key} in step ${stepNumber}`);
                         return;
                     }
                     // Radio
@@ -313,11 +313,11 @@ jQuery(document).ready(function ($) {
                         $step.find(`[name="${key}"][value="${value}"]`)
                             .prop('checked', true)
                             .trigger('change');
-                        console.log(`✅ Radio restored: ${key} = ${value}`);
+                        console.log(` Radio restored: ${key} = ${value}`);
                         return;
                     }
                     restoreField($fields.first(), value);
-                    console.log(`✅ Field restored: ${key} = ${value}`);
+                    console.log(` Field restored: ${key} = ${value}`);
                 }
             });
 
@@ -522,7 +522,7 @@ jQuery(document).ready(function ($) {
 
     /*    Get Step Data    */
 
-    function getStepData() {
+   function getStepData() {
 
         const $activeStep = $(`.form-step-${currentStep}`);
         const $fields = $activeStep.find('input, select, textarea');
@@ -533,40 +533,63 @@ jQuery(document).ready(function ($) {
 
             const $field = $(this);
             const name = $field.attr('name');
+
             if (!name) return;
 
+            /* SKIP HIDDEN SECTIONS */
+            const $wrapper = $field.closest('.form-group, .radio-button, .claim-item, .location-item');
+
+            if (!$wrapper.is(':visible')) {
+                return;
+            }
+
             const type = $field.attr('type');
+
+            /* Skip File Input  */
             if (type === 'file') {
                 return;
-            }   
-            if (type === 'radio') {
+            }
 
+            /* Skip Hidden Inputs If Section Hidden */
+            if (type === 'hidden' && !$field.closest('.custom-select').is(':visible')) {
+                return;
+            }
+
+            /* Radio */
+            if (type === 'radio') {
                 if ($field.is(':checked')) {
                     if (name.includes('[]')) {
-                        if (!formData[name]) formData[name] = [];
+                        if (!formData[name]) {
+                            formData[name] = [];
+                        }
                         formData[name].push($field.val());
                     } else {
                         formData[name] = $field.val();
                     }
                 }
+            }
 
-            } else if (type === 'checkbox') {
-
+            /*
+            Checkbox
+            */
+            else if (type === 'checkbox') {
                 formData[name] = $field.is(':checked');
+            }
 
-            } else {
-
+            /*
+            Normal Fields
+            */
+            else {
                 if (name.includes('[]')) {
-                    if (!formData[name]) formData[name] = [];
+                    if (!formData[name]) {
+                        formData[name] = [];
+                    }
                     formData[name].push($field.val());
                 } else {
                     formData[name] = $field.val();
                 }
-
             }
-
         });
-
         return formData;
 
     }
@@ -577,6 +600,7 @@ jQuery(document).ready(function ($) {
 
         e.preventDefault();
         if (!validateCurrentStep()) {
+            console.log('Validation failed for step', currentStep);
             return;
         }
 
@@ -639,9 +663,9 @@ jQuery(document).ready(function ($) {
                     updateSteps();
                     $('html, body').animate({ scrollTop: $('.stepper-wrapper').offset().top - 100 }, 500);
                 } else {
-                     localStorage.removeItem('current_form_step');
-                    localStorage.removeItem('total_owners'); // ✅ Add this
-                    localStorage.removeItem('total_claims'); // ✅ Add this
+                    localStorage.removeItem('current_form_step');
+                    localStorage.removeItem('total_owners'); //  Add this
+                    localStorage.removeItem('total_claims'); //  Add this
                     for (let i = 1; i <= totalSteps; i++) {
                         localStorage.removeItem(`step_${i}_data_inserted`);
                         localStorage.removeItem(`step_${i}_api_submitted`);
@@ -684,27 +708,27 @@ jQuery(document).ready(function ($) {
 
             const $label = $(this).closest('label');
 
-            /*
-            Find related field
-            */
-
             let $fieldWrapper = $label.closest('.form-group');
 
-            if (!$fieldWrapper.length) return;
+            /*  Find related field */
 
-            /*            Custom Select            */
+            if ( !$fieldWrapper.length || !$fieldWrapper.is(':visible')) {
+                return;
+            }
+
+            if ( !$fieldWrapper.length || !$fieldWrapper.is(':visible')) {
+                return;
+            }
+
+            /*   Custom Select   */
 
             const $hiddenInput = $fieldWrapper.find('.custom-select input[type="hidden"]');
 
             if ($hiddenInput.length) {
 
                 if (!$hiddenInput.val().trim()) {
-
                     isValid = false;
-
-                    $fieldWrapper.find('.custom-select')
-                        .addClass('field-error');
-
+                    $fieldWrapper.find('.custom-select').addClass('field-error');
                 }
 
                 return;
@@ -793,4 +817,246 @@ jQuery(document).ready(function ($) {
     updateSteps();
     loadInitialFormData();
 
+
+    function toggleWebsiteField() {
+        if ($('#website-yes').is(':checked')) {
+            $('.website-url-field').show();
+        } else {
+            $('.website-url-field').hide();
+            $('.website-url-field input').val('');
+        }
+
+    }
+
+    /* Radio Change */
+
+    $(document).on('change','input[name="website_available"]',function () {
+            toggleWebsiteField();
+        }
+    );
+
+   
+
+    function toggleClaimsSection() {
+        const $claimsWrapper = $('.claims-wrapper-main');
+        if ($('#gl-yes').is(':checked')) {
+            $claimsWrapper.show();
+        } else {
+            /* Hide Section */
+            $claimsWrapper.hide();
+            /* Clear All Inputs */
+            $claimsWrapper.find('input[type="text"], input[type="url"], textarea').val('');
+
+            /* Clear Hidden Inputs */
+            $claimsWrapper.find('input[type="hidden"]').val('');
+
+            /* Reset Custom Select Text */
+            $claimsWrapper.find('.selected-text').text('Select');
+
+            /* Remove Active Option */
+            $claimsWrapper.find('.option').removeClass('active');
+
+            /* Uncheck Radios */
+            $claimsWrapper.find('input[type="radio"]').prop('checked', false);
+        }
+    }
+
+    $(document).on('change','input[name="past_claims"]',function () {
+        toggleClaimsSection();
+    });
+
+     /* Page Load */
+    toggleWebsiteField();
+    toggleClaimsSection();
+
+    /* policy type select step 2 BOP GL WC Cyber */
+    $(document).on('change', '.select-policy-type input[type="checkbox"]', function () {
+        $('.select-policy-type input[type="checkbox"]').not(this).prop('checked', false);
+        /* Get selected value */
+        localStorage.removeItem('current_form_step');
+        localStorage.removeItem('total_owners'); //  Add this
+        localStorage.removeItem('total_claims'); //  Add this
+        for (let i = 2; i <= 8; i++) {
+            localStorage.removeItem(`step_${i}_data_inserted`);
+            localStorage.removeItem(`step_${i}_api_submitted`);
+            localStorage.removeItem(`step_${i}_api_response`);
+        }
+        const selectedValue = $(this).closest('.custom-checkbox').find('.checkbox-text').text().trim();
+        $('.policy-form').hide();
+        $('.policy-form-carriers').hide();
+        $('.policy-business-details').hide();
+        $('.policy-operation').hide();
+        $('.policy-underwriting-question').hide();
+        /* Show matching form */
+        $(`.policy-form[data-set="${selectedValue}"]`).show();
+        $(`.policy-form-carriers[data-set="${selectedValue}"]`).show();
+        $(`.policy-business-details[data-set="${selectedValue}"]`).show();
+        $(`.policy-operation[data-set="${selectedValue}"]`).show();
+        $(`.policy-underwriting-question[data-set="${selectedValue}"]`).show();
+    });
+
+
+    /* GL YES / NO */
+    $(document).on('change', 'input[name="gl_policy"]', function () {
+        const selectedValue = $(this).val();
+        if (selectedValue === 'no') {
+            $('.policy-form[data-set="GL"]').find('.form-group').not('.radio-button').hide();
+            /* Clear values */
+            $('.policy-form[data-set="GL"]').find('input[type="text"], input[type="url"], textarea').val('');
+
+        } else {
+            $('.policy-form[data-set="GL"]').find('.form-group').not('.radio-button').show();
+        }
+
+    });
+
+
+    /* BOP YES / NO */
+    $(document).on('change', 'input[name="bop-policy"]', function () {
+        const selectedValue = $(this).val();
+        if (selectedValue === 'no') {
+            $('.policy-form[data-set="BOP"]').find('.form-group').not('.radio-button').hide();
+
+            /* Clear values */
+            $('.policy-form[data-set="BOP"]').find('input[type="text"], input[type="url"], textarea').val('');
+        } else {
+            $('.policy-form[data-set="BOP"]').find('.form-group').not('.radio-button').show();
+        }
+    });
+
+
+    /* On page load */
+    $(document).ready(function () {
+        $('input[name="gl_policy"]:checked').trigger('change');
+        $('input[name="bop-policy"]:checked').trigger('change');
+    });
+
+
+    $(document).on('change', '.checkbox-group-wrapper input[type="checkbox"]', function () {
+        const carrier = $(this).val();
+        if ($(this).is(':checked')) {
+            console.log(carrier);
+            $(`.carrier-card[data-carrier="${carrier}"]`).slideDown();
+            $(`.claim-carrier-card[data-carrier="${carrier}"]`).slideDown();
+        } else {
+            $(`.carrier-card[data-carrier="${carrier}"]`).slideUp();
+            $(`.claim-carrier-card[data-carrier="${carrier}"]`).slideUp();
+            /* Optional: clear values */
+            $(`.carrier-card[data-carrier="${carrier}"]`).find('input, textarea, select').val('');
+            $(`.claim-carrier-card[data-carrier="${carrier}"]`).find('input, textarea, select').val('');
+        }
+    });
+
+    // EPLI Coverage toggle
+    $('input[name="epli_coverage"]').on('change', function () {
+        // All related fields
+        const $epliFields = $('#epli-section .epli-dependent');
+        if ($(this).val() === 'yes') {
+            // Remove disabled class
+            $epliFields.removeClass('disabled');
+
+            // Enable inputs/selects
+            $epliFields.find('input, select, textarea, button').prop('disabled', false);
+
+            // Remove accessibility disabled attrs
+            $epliFields.find('[aria-disabled="true"]').attr('aria-disabled', 'false');
+
+        } else {
+
+            // Add disabled class
+            $epliFields.addClass('disabled');
+
+            // Disable inputs/selects
+            $epliFields.find('input, select, textarea, button').prop('disabled', true);
+
+            // Add accessibility disabled attrs
+            $epliFields.find('[aria-disabled="false"]').attr('aria-disabled', 'true');
+        }
+    });
+
+    function toggleChubbAutoCoverage() {
+
+        const selectedValue = $('input[name="hired_auto"]:checked').val();
+
+        if (selectedValue === 'yes') {
+            $('.chubb-auto-coverage').removeClass('disabled').find('input').prop('disabled', false);
+        } else {
+            $('.chubb-auto-coverage').addClass('disabled').find('input').prop('disabled', true);
+            // Default NO checked
+            $('.chubb-auto-coverage').find('input[type="radio"][value="no"]').prop('checked', true);
+        }
+    }
+
+    // On radio change
+    $('input[name="hired_auto"]').on('change', function () {
+        toggleChubbAutoCoverage();
+    });
+
+
+    function togglePropertyEnhancement() {
+
+        const selectedValue = $('input[name="property_enhancement"]:checked').val();
+
+        // Target only next disabled form-group
+        const targetField = $('input[name="property_enhancement"]')
+            .closest('.form-group')
+            .next('.form-group');
+
+        if (selectedValue === 'yes') {
+
+            targetField.removeClass('disabled');
+
+        } else {
+
+            targetField.addClass('disabled');
+
+        }
+    }
+
+    // On change
+    $('input[name="property_enhancement"]').on('change', function () {
+        togglePropertyEnhancement();
+    });
+
+    // Initial load
+    toggleChubbAutoCoverage();
+    togglePropertyEnhancement();
+
+
+    function erisaDependentToggle(name, target) {
+        const isYes = $(`input[name="${name}"]:checked`).val() === 'yes';
+        $(target).toggleClass('disabled', !isYes).find('input').prop('disabled', !isYes);
+        if (!isYes) {
+            $(target).find('input[type="radio"][value="no"]').prop('checked', true);
+        }
+    }
+
+    // ERISA Coverage
+    $('input[name="erisa_coverage"]').on('change', () =>
+        erisaDependentToggle('erisa_coverage', '.erisa-dependent')
+    );
+
+    // Initial Load
+    erisaDependentToggle('erisa_coverage', '.erisa-dependent');
+
+
+
+    function acuityCyberDependentToggle(name, target) {
+        const isYes = $(`input[name="${name}"]:checked`).val() === 'yes';
+
+        $(target).toggleClass('disabled', !isYes).find('input').prop('disabled', !isYes);
+
+        // Default NO checked when disabled
+        if (!isYes) {
+            $(target).find('input[type="radio"][value="no"]').prop('checked', true);
+        }
+    }
+
+    // Acuity Cyber
+    $('input[name="acuity_cyber"]').on('change', () =>
+        acuityCyberDependentToggle('acuity_cyber', '.acuity-cyber-dependent')
+    );
+
+    // Initial Load
+    acuityCyberDependentToggle('acuity_cyber', '.acuity-cyber-dependent');
 });

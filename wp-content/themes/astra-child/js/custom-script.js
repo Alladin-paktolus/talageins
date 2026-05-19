@@ -373,6 +373,60 @@ jQuery(document).ready(function($) {
 
     });
 
+    $(document).on('click', '.add-location-btn-bop', function() {
+        const $detailsCard = $(this).closest('.locations-wrapper-bop');
+        /* Get Last Location */
+        const $lastLocation = $detailsCard.find('.location-item-bop').last();
+        if (!$lastLocation.length) {
+            console.error('No location block found');
+            return;
+        }
+        /* Total Locations */
+        const totalLocations = $detailsCard.find('.location-item-bop').length;
+        const newLocationNumber = totalLocations + 1;
+
+        /* Clone */
+        const $newLocation = $lastLocation.clone();
+
+        /* Update Heading */
+        $newLocation.find('.owner-name h4').text(`Location ${newLocationNumber}`);
+
+        /* Reset Inputs */
+        $newLocation.find('input[type="text"]').val('');
+        $newLocation.find('textarea').val('');
+
+        /* set Custom Select */
+        $newLocation.find('.custom-select').each(function() {
+            const $select = $(this);
+            $select.find('.selected-text').text('Select');
+            $select.find('.option').removeClass('active');
+            $select.find('input[type="hidden"]').val('');
+        });
+
+        /* Update Names */
+        $newLocation.find('input, textarea, select').each(function() {
+            const $field = $(this);
+            const oldName = $field.attr('name');
+            if (!oldName) return;
+            const newName = oldName.replace(/location_\d+/g, `location_${newLocationNumber}`);
+            $field.attr('name', newName);
+
+        });
+
+        /* Append */
+        $lastLocation.after($newLocation);
+
+        /* Save Count */
+        localStorage.setItem('total_locations', newLocationNumber);
+
+        /* Reinitialize Select */
+        if (typeof initializeCustomSelect === 'function') {
+            initializeCustomSelect();
+        }
+        console.log(` Location ${newLocationNumber} added`);
+
+    });
+
 
     /* REMOVE LOCATION */
 

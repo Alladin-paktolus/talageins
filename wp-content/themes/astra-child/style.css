@@ -356,12 +356,13 @@ hr {
   flex-direction: column;
 }
 
-.form-group label {
+.form-group label, .form-group legend {
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 700;
   color: var(--primary-color);
   line-height: 20px; /* 142.857% */
+  padding-left: 0;
 }
 .form-group label .asteric {
   color: #c52020;
@@ -731,15 +732,21 @@ input[type="radio"]:checked + .toggle-btn {
   row-gap: 12px;
   column-gap: 12px;
 }
+.radio-button legend {
+    display: contents;
+}
 .border-div .checkbox-group-wrapper {
-  display: flex;
-  gap: 12px;
-  flex-direction: row;
-  flex-wrap: nowrap;
+    display: flex;
+    gap: 12px;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+.mtb-24 {
+    margin: 24px 0px;
 }
 .border-div .checkbox-group-wrapper .custom-checkbox {
-  width: 50%;
-  gap: 12px;
+    width: calc(50% - 6px);
+    gap: 12px;
 }
 .card-gray {
   background: var(--Card-Grey, rgba(242, 242, 242, 0.5));
@@ -1241,4 +1248,9 @@ flex-direction: column;
     padding: 10px;
     border: 1px solid red;
     border-radius: 8px;
+}
+fieldset {
+    padding: 0;
+    border-radius: unset;
+    border: unset;
 }

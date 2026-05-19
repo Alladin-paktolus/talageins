@@ -57,7 +57,7 @@ get_header();
         </div>
     </section>
 
-    <form id="multiStepForm">
+    <form id="multiStepForm" method="post">
         <div class="form-loader">
             <div class="loader-spinner"></div>
         </div>
