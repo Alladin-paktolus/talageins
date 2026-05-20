@@ -1,7 +1,7 @@
 <div class="form-container">
   <div class="details-card gap-32 locations-wrapper">
     <!-- LOCATION 1 -->
-    <div class="policy-claim-history" data-set="GL" style="display: none;">
+    <div class="policy-operation-details" data-set="GL" style="display: none;">
       <div class="heading-section">
         <div class="form-title">
           <h2>Operations</h2>

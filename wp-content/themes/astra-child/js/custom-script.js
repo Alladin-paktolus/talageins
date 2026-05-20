@@ -404,13 +404,13 @@ jQuery(document).ready(function($) {
         });
 
         /* Update Names */
-        $newLocation.find('input, textarea, select').each(function() {
+        $('.locations-wrapper-bop .location-item-bop').first().find('input, textarea, select').each(function () {
             const $field = $(this);
             const oldName = $field.attr('name');
             if (!oldName) return;
-            const newName = oldName.replace(/location_\d+/g, `location_${newLocationNumber}`);
-            $field.attr('name', newName);
-
+            // Skip already updated fields
+            if (oldName.startsWith('location_1_')) return;
+            $field.attr('name', `location_1_${oldName}`);
         });
 
         /* Append */
@@ -427,6 +427,33 @@ jQuery(document).ready(function($) {
 
     });
 
+    $(document).on('click', '.location-item-bop .close-icon', function () {
+        const $wrapper = $(this).closest('.locations-wrapper-bop');
+        const $currentItem = $(this).closest('.location-item-bop');
+        // Don't remove if only 1 left
+        if ($wrapper.find('.location-item-bop').length <= 1) {
+            return;
+        }
+        // Remove current location
+        $currentItem.remove();
+        // Reorder headings
+        $wrapper.find('.location-item-bop').each(function (index) {
+            const locationNumber = index + 1;
+            // Update heading
+            $(this).find('.owner-name h4').text(`Location ${locationNumber}`);
+            // Update field names
+            $(this).find('input, textarea, select').each(function () {
+                const oldName = $(this).attr('name');
+                if (!oldName) return;
+                const newName = oldName.replace(/location_\d+/g, `location_${locationNumber}`);
+                $(this).attr('name', newName);
+            });
+        });
+
+        // Update localStorage count
+        localStorage.setItem('total_locations',$wrapper.find('.location-item-bop').length
+        );
+    });
 
     /* REMOVE LOCATION */
 

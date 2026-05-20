@@ -1,5 +1,5 @@
 <div class="details-card gap-32 locations-wrapper-bop">
-    <div class="policy-claim-history" data-set="BOP">
+    <div class="policy-operation-details" data-set="BOP">
         <div class="heading-section">
             <div class="form-title">
                 <h2>Operations</h2>
@@ -179,7 +179,8 @@
                                 <i class="fa-solid fa-chevron-down arrow-icon" aria-hidden="true"></i>
                             </div>
                             <div class="options-container" role="listbox" id="year-built-options">
-                                <div class="option" role="option" data-value="YYYY" tabindex="-1">YYYY</div>
+                                <div class="option" role="option" data-value="2025" tabindex="-1">2025</div>
+                                <div class="option" role="option" data-value="2026" tabindex="-1">2026</div>
                             </div>
                             <input type="hidden" name="year_built" value="" />
                         </div>
@@ -196,7 +197,8 @@
                                 <i class="fa-solid fa-chevron-down arrow-icon" aria-hidden="true"></i>
                             </div>
                             <div class="options-container" role="listbox" id="roofing-year-options">
-                                <div class="option" role="option" data-value="YYYY" tabindex="-1">YYYY</div>
+                                <div class="option" role="option" data-value="2025" tabindex="-1">2025</div>
+                                <div class="option" role="option" data-value="2026" tabindex="-1">2026</div>
                             </div>
                             <input type="hidden" name="roofing_year" value="" />
                         </div>
@@ -213,7 +215,8 @@
                                 <i class="fa-solid fa-chevron-down arrow-icon" aria-hidden="true"></i>
                             </div>
                             <div class="options-container" role="listbox" id="wiring-year-options">
-                                <div class="option" role="option" data-value="YYYY" tabindex="-1">YYYY</div>
+                                <div class="option" role="option" data-value="2025" tabindex="-1">2025</div>
+                                <div class="option" role="option" data-value="2026" tabindex="-1">2026</div>
                             </div>
                             <input type="hidden" name="wiring_year" value="" />
                         </div>
@@ -230,7 +233,8 @@
                                 <i class="fa-solid fa-chevron-down arrow-icon" aria-hidden="true"></i>
                             </div>
                             <div class="options-container" role="listbox" id="heating-year-options">
-                                <div class="option" role="option" data-value="YYYY" tabindex="-1">YYYY</div>
+                                <div class="option" role="option" data-value="2025" tabindex="-1">2025</div>
+                                <div class="option" role="option" data-value="2026" tabindex="-1">2026</div>
                             </div>
                             <input type="hidden" name="heating_year" value="" />
                         </div>
@@ -247,7 +251,8 @@
                                 <i class="fa-solid fa-chevron-down arrow-icon" aria-hidden="true"></i>
                             </div>
                             <div class="options-container" role="listbox" id="plumbing-year-options">
-                                <div class="option" role="option" data-value="YYYY" tabindex="-1">YYYY</div>
+                                <div class="option" role="option" data-value="2025" tabindex="-1">2025</div>
+                                <div class="option" role="option" data-value="2026" tabindex="-1">2026</div>
                             </div>
                             <input type="hidden" name="plumbing_year" value="" />
                         </div>
@@ -275,7 +280,9 @@
                                 <i class="fa-solid fa-chevron-down arrow-icon" aria-hidden="true"></i>
                             </div>
                             <div class="options-container" role="listbox" id="roof-type-options">
-                                <div class="option" role="option" data-value="Choose one" tabindex="-1">Choose one</div>
+                                <div class="option" role="option" data-value="Type 1" tabindex="-1">Type 1</div>
+                                <div class="option" role="option" data-value="Type 2" tabindex="-1">Type 2</div>
+                                <div class="option" role="option" data-value="Type 3" tabindex="-1">Type 3</div>
                             </div>
                             <input type="hidden" name="roof_type" value="" />
                         </div>
