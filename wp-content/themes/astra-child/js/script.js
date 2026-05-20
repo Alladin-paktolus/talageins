@@ -187,6 +187,7 @@ jQuery(document).ready(function ($) {
         console.log( 'Locations after restore:', $('.locations-wrapper .location-item').length);
 
         initializeCustomSelect();
+        checkUploadedFile();
 
         console.log('=== Dynamic Sections Restored ===');
 
@@ -415,21 +416,10 @@ jQuery(document).ready(function ($) {
                     $('#industryCodeId').val(firstIndustry.industryCodeCategoryId || '');
                 }
 
-                // initializeCustomSelect();
-
-                // // Wait for dynamic sections to be created
-                // // then fill all fields
-                // await restoreDynamicSections();
-
-                // // Reinitialize custom select for new cloned sections
-                // initializeCustomSelect();
-
-                // // Now fill all fields including cloned ones
-                // loadSavedFormData();
-
                 await restoreDynamicSections();
                 loadSavedFormData();
                 initializeCustomSelect();
+                checkUploadedFile();
 
             }
 
@@ -551,7 +541,7 @@ jQuery(document).ready(function ($) {
             }
 
             /* Skip Hidden Inputs If Section Hidden */
-            if (type === 'hidden' && !$field.closest('.custom-select').is(':visible')) {
+           if (type === 'hidden' && $field.closest('.custom-select').length && !$field.closest('.custom-select').is(':visible')) {
                 return;
             }
 
@@ -597,23 +587,21 @@ jQuery(document).ready(function ($) {
     /*    Next Button Click    */
 
     $nextBtn.on('click', async function (e) {
-
         e.preventDefault();
         if (!validateCurrentStep()) {
             console.log('Validation failed for step', currentStep);
             return;
         }
-
         if ($nextBtn.hasClass('loading')) return;
 
         const stepData = getStepData();
 
+        console.log(stepData);
         const savedStepData = localStorage.getItem(`step_${currentStep}_data_inserted`);
         const isDataSame = savedStepData && JSON.stringify(stepData) === savedStepData;
         const isApiSubmitted = localStorage.getItem(`step_${currentStep}_api_submitted`) === 'true';
 
         if (isDataSame && isApiSubmitted) {
-
             if (currentStep < totalSteps) {
                 currentStep++;
                 localStorage.setItem('current_form_step', currentStep);
@@ -622,16 +610,13 @@ jQuery(document).ready(function ($) {
             } else {
                 $form.submit();
             }
-
             return;
-
         }
 
         localStorage.setItem(`step_${currentStep}_data_inserted`, JSON.stringify(stepData));
         $nextBtn.addClass('loading').prop('disabled', true).text('Processing...');
 
         try {
-
             const ajaxData = new FormData();
             ajaxData.append('step', currentStep);
 
@@ -691,11 +676,8 @@ jQuery(document).ready(function ($) {
     /*    Validate Current Step    */
 
     function validateCurrentStep() {
-
         let isValid = true;
-
         const $activeStep = $(`.form-step-${currentStep}`);
-
         /*
         Remove old errors
         */
@@ -926,10 +908,10 @@ jQuery(document).ready(function ($) {
 
 
     /* On page load */
-    $(document).ready(function () {
-        $('input[name="gl_policy"]:checked').trigger('change');
-        $('input[name="bop-policy"]:checked').trigger('change');
-    });
+   
+    $('input[name="gl_policy"]:checked').trigger('change');
+    $('input[name="bop-policy"]:checked').trigger('change');
+   
 
 
     $(document).on('change', '.checkbox-group-wrapper input[type="checkbox"]', function () {
@@ -1059,4 +1041,88 @@ jQuery(document).ready(function ($) {
 
     // Initial Load
     acuityCyberDependentToggle('acuity_cyber', '.acuity-cyber-dependent');
+
+    function checkUploadedFile() {
+        var realFileValue = jQuery('#real_file_name').val();
+        if(realFileValue){
+            jQuery('.uploaded-file-wrapper .file-name').html(realFileValue);
+            jQuery('.uploaded-file-wrapper').show();
+        } else {
+            $('.uploaded-file-wrapper').hide();
+        }
+    }
+
+    /* upload file using ajax */
+
+    $('#fileUpload').on('change', function () {
+
+        let file = this.files[0];
+
+        if (!file) return;
+
+        let formData = new FormData();
+
+        formData.append('action', 'upload_custom_file');
+        formData.append('custom_file', file);
+
+        // Remove old uploaded file
+        let oldFile = $('#uploaded_file').val();
+
+        if (oldFile) {
+
+            $.ajax({
+                url: policy_form.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'remove_uploaded_file',
+                    file_url: oldFile
+                }
+            });
+
+        }
+
+        $.ajax({
+
+            url: policy_form.ajax_url,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+
+            success: function (response) {
+
+                if (response.success) {
+
+                    $('#uploaded_file').val(response.data.file_url);
+                    $('#real_file_name').val(response.data.real_file_name);
+                    $('.file-name').html(response.data.real_file_name);
+                    $('.uploaded-file-wrapper').show();
+
+                }
+
+            }
+
+        });
+
+    });
+
+
+    // Remove Uploaded File
+    $('.remove-file').on('click', function () {
+        let fileUrl = $('#uploaded_file').val();
+        $.ajax({
+            url: policy_form.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'remove_uploaded_file',
+                file_url: fileUrl
+            },
+            success: function () {
+                $('#uploaded_file').val('');
+                $('#fileUpload').val('');
+                $('.uploaded-file-wrapper').hide();
+                $('.file-name').text('');
+            }
+        });
+    });
 });

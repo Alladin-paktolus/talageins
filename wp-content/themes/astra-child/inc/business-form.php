@@ -3,13 +3,10 @@ add_action('wp_ajax_load_policy_form_data','load_policy_form_data');
 add_action('wp_ajax_nopriv_load_policy_form_data','load_policy_form_data');
 function load_policy_form_data() {
 
-    check_ajax_referer(
-        'policy_form_nonce',
-        'nonce'
-    );
+    check_ajax_referer('policy_form_nonce','nonce');
 
     $agency_response = talage_api_request('https://demoapi.talageins.com/v1/api/agency',array(),'GET');
-
+    
     $agency_data = array_map(function ($agency) {
         return array(
             'name'      => $agency['name'] ?? '',
@@ -64,14 +61,10 @@ function talage_create_policy_step() {
     check_ajax_referer('policy_form_nonce', 'nonce');
 
     // Current Step
-    $step = isset($_POST['step'])
-        ? absint($_POST['step'])
-        : 1;
+    $step = isset($_POST['step']) ? absint($_POST['step']) : 1;
 
     // Form Data
-    $form_data = isset($_POST['form_data'])
-        ? json_decode(stripslashes($_POST['form_data']), true)
-        : array();
+    $form_data = isset($_POST['form_data']) ? json_decode(stripslashes($_POST['form_data']), true) : array();
 
     $customer_name = trim($form_data['customer_name'] ?? '');
     $name_parts = explode(' ', $customer_name);
@@ -106,7 +99,7 @@ function talage_create_policy_step() {
             )
         ),
         'founded' => '2010-04-01T12:00:00.000Z',
-        'industryCode' => (int) ($form_data['industry_code_id'] ?? 0),
+        'industryCode' => (int) ($form_data['industryCodeId'] ?? 0),
         'locations' => array(
             array(
                 'address'           => '200 S. Virginia Street',
@@ -135,23 +128,15 @@ function talage_create_policy_step() {
 
     );
 
-    /*
-    ========================================
-    API Call
-    ========================================
-    */
-
+    /*    API Call    */
+      
     $response = talage_api_request(
         'https://demoapi.talageins.com/v1/api/application',
         $api_payload,
         'POST'
     );
 
-    /*
-    ========================================
-    Error Response
-    ========================================
-    */
+    /*    Error Response    */
 
     if (!$response['success']) {
         wp_send_json_error(array(
@@ -162,11 +147,7 @@ function talage_create_policy_step() {
 
     }
 
-    /*
-    ========================================
-    Success Response
-    ========================================
-    */
+    /*    Success Response    */
 
     wp_send_json_success(array(
         'message' => 'Step saved successfully.',
@@ -178,35 +159,21 @@ function talage_create_policy_step() {
 
 
 /*
-========================================
 Main API Request Function
-========================================
 */
 
 function talage_api_request($endpoint, $body = array(), $method = 'POST') {
 
-    /*
-    ========================================
-    Get Saved Token
-    ========================================
-    */
-
+    /*    Get Saved Token    */
     $token = get_option('talage_api_token');
-
     if (empty($token)) {
 
         $token = talage_generate_auth_token();
 
         // Save Token
         if ($token) {
-
-            update_option(
-                'talage_api_token',
-                $token
-            );
-
+            update_option('talage_api_token', $token );
         } else {
-
             return array(
                 'success' => false,
                 'status'  => 401,
@@ -217,16 +184,10 @@ function talage_api_request($endpoint, $body = array(), $method = 'POST') {
         }
 
     }
-    /*
-    ========================================
-    CURL Setup
-    ========================================
-    */
+    /*    CURL Setup    */
 
     $curl = curl_init();
-
     curl_setopt_array($curl, array(
-
         CURLOPT_URL            => $endpoint,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING       => '',
@@ -234,17 +195,12 @@ function talage_api_request($endpoint, $body = array(), $method = 'POST') {
         CURLOPT_TIMEOUT        => 30,
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-
         CURLOPT_CUSTOMREQUEST  => $method,
-
-        CURLOPT_POSTFIELDS     => !empty($body)
-            ? json_encode($body)
-            : null,
+        CURLOPT_POSTFIELDS     => !empty($body) ? json_encode($body) : null,
 
         // Local SSL Fix
         CURLOPT_SSL_VERIFYPEER => false,
         CURLOPT_SSL_VERIFYHOST => false,
-
         CURLOPT_HTTPHEADER => array(
             'Content-Type: application/json',
             'Authorization: ' . $token
@@ -252,11 +208,7 @@ function talage_api_request($endpoint, $body = array(), $method = 'POST') {
 
     ));
 
-    /*
-    ========================================
-    Execute CURL
-    ========================================
-    */
+    /*    Execute CURL    */
 
     $response   = curl_exec($curl);
     $http_code  = curl_getinfo($curl, CURLINFO_HTTP_CODE);
@@ -264,11 +216,7 @@ function talage_api_request($endpoint, $body = array(), $method = 'POST') {
 
     curl_close($curl);
 
-    /*
-    ========================================
-    CURL Error
-    ========================================
-    */
+    /*    CURL Error    */
 
     if ($curl_error) {
 
@@ -281,19 +229,11 @@ function talage_api_request($endpoint, $body = array(), $method = 'POST') {
 
     }
 
-    /*
-    ========================================
-    Decode Response
-    ========================================
-    */
+    /*    Decode Response    */
 
     $response_data = json_decode($response, true);
 
-    /*
-    ========================================
-    Token Expired / Unauthorized
-    ========================================
-    */
+    /*    Token Expired / Unauthorized    */
 
     if (
         $http_code === 401 ||
@@ -325,11 +265,7 @@ function talage_api_request($endpoint, $body = array(), $method = 'POST') {
 
     }
 
-    /*
-    ========================================
-    API Error
-    ========================================
-    */
+    /*    API Error    */
 
     if ($http_code >= 400) {
 
@@ -342,11 +278,7 @@ function talage_api_request($endpoint, $body = array(), $method = 'POST') {
 
     }
 
-    /*
-    ========================================
-    Success
-    ========================================
-    */
+    /*    Success    */
 
     return array(
         'success' => true,
@@ -359,9 +291,7 @@ function talage_api_request($endpoint, $body = array(), $method = 'POST') {
 
 
 /*
-========================================
 Generate Auth Token
-========================================
 */
 
 function talage_generate_auth_token() {
@@ -408,3 +338,66 @@ function talage_generate_auth_token() {
 
 }
 
+add_action('wp_ajax_upload_custom_file', 'upload_custom_file');
+add_action('wp_ajax_nopriv_upload_custom_file', 'upload_custom_file');
+function upload_custom_file() {
+
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+
+    if (empty($_FILES['custom_file'])) {
+        wp_send_json_error('No file uploaded');
+    }
+
+    $uploadedfile = $_FILES['custom_file'];
+
+    // Original file name
+    $original_name = sanitize_file_name($uploadedfile['name']);
+
+    // Extension
+    $ext = pathinfo($original_name, PATHINFO_EXTENSION);
+
+    // Unique file name for server
+    $new_file_name = uniqid('file_') . '_' . time() . '.' . $ext;
+
+    // Rename uploaded file
+    $uploadedfile['name'] = $new_file_name;
+
+    $upload_overrides = [
+        'test_form' => false
+    ];
+
+    $movefile = wp_handle_upload($uploadedfile, $upload_overrides);
+    $original_name = '<a href="' . esc_url($movefile['url']) . '" target="_blank">' . esc_html($original_name) . '</a>';
+    if ($movefile && !isset($movefile['error'])) {
+
+        wp_send_json_success([
+            'file_url'       => $movefile['url'],
+            'real_file_name' => $original_name,
+            'saved_name'     => basename($movefile['file'])
+        ]);
+
+    } else {
+
+        wp_send_json_error($movefile['error']);
+
+    }
+
+    wp_die();
+}
+
+
+// Remove File
+add_action('wp_ajax_remove_uploaded_file', 'remove_uploaded_file');
+add_action('wp_ajax_nopriv_remove_uploaded_file', 'remove_uploaded_file');
+function remove_uploaded_file() {
+    if (!empty($_POST['file_url'])) {
+        $file_url = esc_url_raw($_POST['file_url']);
+        $upload_dir = wp_upload_dir();
+        $file_path = str_replace($upload_dir['baseurl'], $upload_dir['basedir'], $file_url);
+        if (file_exists($file_path)) {
+            unlink($file_path);
+        }
+    }
+    wp_send_json_success();
+    wp_die();
+}

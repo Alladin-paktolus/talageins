@@ -10,6 +10,8 @@
       </label>
       <div class="custom-select agency-select">
         <input type="hidden" name="agency" value="">
+        <input type="hidden" id="agency_id" name="agency_id" value="">
+        <input type="hidden" id="industryCodeId" name="industryCodeId" value="">
         <div class="select-box" tabindex="0" role="button" aria-haspopup="listbox" aria-expanded="false">
           <span class="selected-text"> Select Agency </span>
           <i class="fa-solid fa-chevron-down arrow-icon" aria-hidden="true"></i>
@@ -31,7 +33,7 @@
           <i class="fa-solid fa-chevron-down arrow-icon"></i>
         </div>
         <div class="options-container">
-          <div class="option" data-value="Los Angeles, CA - 555 W 5th St"> Los Angeles, CA - 555 W 5th St </div>
+          <div class="option" data-value="Los Angeles, CA - 555 W 5th St" selected> Los Angeles, CA - 555 W 5th St </div>
           <div class="option" data-value="New York, NY - 100 Park Ave"> New York, NY - 100 Park Ave </div>
         </div>
       </div>
@@ -121,8 +123,6 @@
       <label>Application Tag</label>
       <input type="text" name="application_tag" placeholder="Optional reference">
     </div>
-
-     <input type="hidden" id="agency_id" name="agency_id" value="">
-    <input type="hidden" id="industryCodeId" name="industry_code_id" value="">
+    <
   </div>
 </div>

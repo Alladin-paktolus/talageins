@@ -18,6 +18,16 @@
           <div class="main-text"> Click here to upload loss run reports </div>
           <div class="sub-text"> PDF, XLSX, CSV — max 50MB </div>
         </div>
+        <input type="hidden" name="uploaded_file" id="uploaded_file" value="">
+        <input type="hidden" name="real_file_name" id="real_file_name" value="">
+        <div class="uploaded-file-wrapper" style="display:none;">
+            <span class="file-name"></span>
+            <button type="button" class="remove-file">
+                ✕
+            </button>
+        </div>
+        <!-- Hidden Field -->
+        <input type="hidden" name="uploaded_file" id="uploaded_file">
         <p class="upload-note" id="fileHelp"> Maximum file size 50MB </p>
       </div>
     </div>
